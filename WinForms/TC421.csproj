@@ -59,8 +59,8 @@
     <Compile Include="Program.cs" />
     <Compile Include="Models\ProjectItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Protocols\Protocol_Usb.cs" />
-    <Compile Include="Protocols\Protocol_Wifi.cs" />
+    <Compile Include="Protocols\ProtocolUsb.cs" />
+    <Compile Include="Protocols\ProtocolWifi.cs" />
     <Compile Include="Classes\UdpHelper.cs" />
     <EmbeddedResource Include="frmMain.resx">
       <DependentUpon>frmMain.cs</DependentUpon>

@@ -2,7 +2,7 @@
 {
     using System;
     using System.Text;
-    public static class Protocol_Usb
+    public static class ProtocolUsb
     {
         private static byte Header_One = 85;
         private static byte Header_Two = 170;
@@ -12,17 +12,17 @@
         {
             int year = DateTime.Now.Year;
             int num1 = 0;
-            byte[] numArray1 = new byte[Protocol_Usb.MaxBuff];
+            byte[] numArray1 = new byte[ProtocolUsb.MaxBuff];
             byte num2 = 0;
             byte[] numArray2 = numArray1;
             int index1 = num1;
             int num3 = index1 + 1;
-            int headerOne = (int)Protocol_Usb.Header_One;
+            int headerOne = (int)ProtocolUsb.Header_One;
             numArray2[index1] = (byte)headerOne;
             byte[] numArray3 = numArray1;
             int index2 = num3;
             int num4 = index2 + 1;
-            int headerTwo = (int)Protocol_Usb.Header_Two;
+            int headerTwo = (int)ProtocolUsb.Header_Two;
             numArray3[index2] = (byte)headerTwo;
             byte[] numArray4 = numArray1;
             int index3 = num4;
@@ -71,43 +71,43 @@
             for (int index12 = 0; index12 < 13; ++index12)
                 num2 += numArray1[index12];
             byte num22 = (byte)((uint)byte.MaxValue & (uint)num2);
-            numArray1[Protocol_Usb.MaxBuff - 1] = num22;
+            numArray1[ProtocolUsb.MaxBuff - 1] = num22;
             return numArray1;
         }
 
         public static byte[] ClearAllModel()
         {
-            byte[] numArray = new byte[Protocol_Usb.MaxBuff];
+            byte[] numArray = new byte[ProtocolUsb.MaxBuff];
             int index1 = 0;
             int num1 = index1 + 1;
-            numArray[index1] = Protocol_Usb.Header_One;
+            numArray[index1] = ProtocolUsb.Header_One;
             int index2 = num1;
             int num2 = index2 + 1;
-            numArray[index2] = Protocol_Usb.Header_Two;
+            numArray[index2] = ProtocolUsb.Header_Two;
             int index3 = num2;
             int num3 = index3 + 1;
             numArray[index3] = (byte)5;
             int index4 = num3;
             int num4 = index4 + 1;
             numArray[index4] = (byte)254;
-            numArray[Protocol_Usb.MaxBuff - 1] = (byte)2;
+            numArray[ProtocolUsb.MaxBuff - 1] = (byte)2;
             return numArray;
         }
 
         public static byte[] ReadyPlayModel(string ModelName)
         {
             byte[] numArray1 = Encoding.Default.GetBytes(ModelName).Length <= 8 ? Encoding.Default.GetBytes(ModelName) : Encoding.Default.GetBytes(ModelName.Substring(0, 4));
-            byte[] numArray2 = new byte[Protocol_Usb.MaxBuff];
+            byte[] numArray2 = new byte[ProtocolUsb.MaxBuff];
             int num1 = 0;
             byte[] numArray3 = numArray2;
             int index1 = num1;
             int num2 = index1 + 1;
-            int headerOne = (int)Protocol_Usb.Header_One;
+            int headerOne = (int)ProtocolUsb.Header_One;
             numArray3[index1] = (byte)headerOne;
             byte[] numArray4 = numArray2;
             int index2 = num2;
             int num3 = index2 + 1;
-            int headerTwo = (int)Protocol_Usb.Header_Two;
+            int headerTwo = (int)ProtocolUsb.Header_Two;
             numArray4[index2] = (byte)headerTwo;
             byte[] numArray5 = numArray2;
             int index3 = num3;
@@ -142,15 +142,15 @@
         {
             if (value == null)
                 return (byte[])null;
-            byte[] numArray1 = new byte[Protocol_Usb.MaxBuff];
+            byte[] numArray1 = new byte[ProtocolUsb.MaxBuff];
             byte[] numArray2 = new byte[6]
             {
-        (byte) 85,
-        (byte) 170,
-        (byte) 6,
-        (byte) 2,
-        (byte) 0,
-        (byte) value.Length
+                (byte) 85,
+                (byte) 170,
+                (byte) 6,
+                (byte) 2,
+                (byte) 0,
+                (byte) value.Length
             };
             numArray2.CopyTo((Array)numArray1, 0);
             value.CopyTo((Array)numArray1, 6);
@@ -163,29 +163,29 @@
 
         public static byte[] EndTransmission()
         {
-            byte[] numArray = new byte[Protocol_Usb.MaxBuff];
-            numArray[0] = Protocol_Usb.Header_One;
-            numArray[1] = Protocol_Usb.Header_Two;
+            byte[] numArray = new byte[ProtocolUsb.MaxBuff];
+            numArray[0] = ProtocolUsb.Header_One;
+            numArray[1] = ProtocolUsb.Header_Two;
             numArray[2] = (byte)3;
             numArray[3] = (byte)8;
-            numArray[Protocol_Usb.MaxBuff - 1] = (byte)10;
+            numArray[ProtocolUsb.MaxBuff - 1] = (byte)10;
             return numArray;
         }
 
         public static byte[] ReadyLoadModel(string ModelName, int ModelIndex)
         {
             byte[] numArray1 = Encoding.Default.GetBytes(ModelName).Length <= 8 ? Encoding.Default.GetBytes(ModelName) : Encoding.Default.GetBytes(ModelName.Substring(0, 4));
-            byte[] numArray2 = new byte[Protocol_Usb.MaxBuff];
+            byte[] numArray2 = new byte[ProtocolUsb.MaxBuff];
             int num1 = 0;
             byte[] numArray3 = numArray2;
             int index1 = num1;
             int num2 = index1 + 1;
-            int headerOne = (int)Protocol_Usb.Header_One;
+            int headerOne = (int)ProtocolUsb.Header_One;
             numArray3[index1] = (byte)headerOne;
             byte[] numArray4 = numArray2;
             int index2 = num2;
             int num3 = index2 + 1;
-            int headerTwo = (int)Protocol_Usb.Header_Two;
+            int headerTwo = (int)ProtocolUsb.Header_Two;
             numArray4[index2] = (byte)headerTwo;
             byte[] numArray5 = numArray2;
             int index3 = num3;
@@ -213,23 +213,23 @@
             int num9 = 0;
             for (int index9 = 0; index9 < index8 + numArray1.Length; ++index9)
                 num9 += (int)numArray2[index9];
-            numArray2[Protocol_Usb.MaxBuff - 1] = (byte)(num9 & (int)byte.MaxValue);
+            numArray2[ProtocolUsb.MaxBuff - 1] = (byte)(num9 & (int)byte.MaxValue);
             return numArray2;
         }
 
         public static byte[] LoadModelValue(byte[] value)
         {
-            byte[] numArray1 = new byte[Protocol_Usb.MaxBuff];
+            byte[] numArray1 = new byte[ProtocolUsb.MaxBuff];
             int num1 = 0;
             byte[] numArray2 = numArray1;
             int index1 = num1;
             int num2 = index1 + 1;
-            int headerOne = (int)Protocol_Usb.Header_One;
+            int headerOne = (int)ProtocolUsb.Header_One;
             numArray2[index1] = (byte)headerOne;
             byte[] numArray3 = numArray1;
             int index2 = num2;
             int num3 = index2 + 1;
-            int headerTwo = (int)Protocol_Usb.Header_Two;
+            int headerTwo = (int)ProtocolUsb.Header_Two;
             numArray3[index2] = (byte)headerTwo;
             byte[] numArray4 = numArray1;
             int index3 = num3;
@@ -251,7 +251,7 @@
             int num7 = 0;
             for (int index8 = 0; index8 < index7 + value.Length; ++index8)
                 num7 += (int)numArray1[index8];
-            numArray1[Protocol_Usb.MaxBuff - 1] = (byte)(num7 & (int)byte.MaxValue);
+            numArray1[ProtocolUsb.MaxBuff - 1] = (byte)(num7 & (int)byte.MaxValue);
             return numArray1;
         }
     }

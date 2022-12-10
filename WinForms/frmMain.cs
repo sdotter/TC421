@@ -39,7 +39,7 @@
         private RetureDataStaus PlayCurrentState = RetureDataStaus.RETURE_DATA_NONE;
         private RetureDataStaus LoadCurrentState = RetureDataStaus.RETURE_DATA_NONE;
 
-        private void SearchWifiDevice() => new DeleteSearch(UdpHelper.Instance.SendBroadcast).BeginInvoke(Protocol_Wifi.SearchDevice(), new AsyncCallback(this.CallBackSearch), (object)null);
+        private void SearchWifiDevice() => new DeleteSearch(UdpHelper.Instance.SendBroadcast).BeginInvoke(ProtocolWifi.SearchDevice(), new AsyncCallback(this.CallBackSearch), (object)null);
         
         private void CallBackSearch(IAsyncResult result)
         {
@@ -173,25 +173,25 @@
             switch (ins)
             {
                 case Ins.TIME_SYNCHRONIZATION:
-                    new DelegateSendResult(UdpHelper.Instance.SendBroadcast).BeginInvoke(Protocol_Wifi.TimeSynchronization(), new AsyncCallback(this.CallbackReceive), (object)Ins.TIME_SYNCHRONIZATION);
+                    new DelegateSendResult(UdpHelper.Instance.SendBroadcast).BeginInvoke(ProtocolWifi.TimeSynchronization(), new AsyncCallback(this.CallbackReceive), (object)Ins.TIME_SYNCHRONIZATION);
                     break;
                 case Ins.CLEAR_DEVICE_MODEL:
-                    new DelegateSendResult(UdpHelper.Instance.SendBroadcast).BeginInvoke(Protocol_Wifi.ClearAllModel(), new AsyncCallback(this.CallbackReceive), (object)Ins.CLEAR_DEVICE_MODEL);
+                    new DelegateSendResult(UdpHelper.Instance.SendBroadcast).BeginInvoke(ProtocolWifi.ClearAllModel(), new AsyncCallback(this.CallbackReceive), (object)Ins.CLEAR_DEVICE_MODEL);
                     break;
                 case Ins.PLAY_MODEL_NAME:
-                    //UdpHelper.Instance.SendBroadcastNone(Protocol_Wifi.ReadyPlayModel(this.ModelList.SelectedItem.Text));
+                    //UdpHelper.Instance.SendBroadcastNone(ProtocolWifi.ReadyPlayModel(this.ModelList.SelectedItem.Text));
                     break;
                 case Ins.PLAY_MODEL_VALUE:
-                    UdpHelper.Instance.SendBroadcastNone(Protocol_Wifi.PlayModelValues(sender as byte[]));
+                    UdpHelper.Instance.SendBroadcastNone(ProtocolWifi.PlayModelValues(sender as byte[]));
                     break;
                 case Ins.END_TRANSMISSION:
-                    new DelegateSendResult(UdpHelper.Instance.SendBroadcast).BeginInvoke(Protocol_Wifi.EndTransmission(), new AsyncCallback(this.CallbackReceive), (object)Ins.END_TRANSMISSION);
+                    new DelegateSendResult(UdpHelper.Instance.SendBroadcast).BeginInvoke(ProtocolWifi.EndTransmission(), new AsyncCallback(this.CallbackReceive), (object)Ins.END_TRANSMISSION);
                     break;
                 case Ins.LOAD_MODEL_NAME:
-                    //new DelegateSendResult(UdpHelper.Instance.SendBroadcast).BeginInvoke(Protocol_Wifi.ReadyLoadModel(this.ModelList.SelectedItem.Text, this.ModelList.Items.FindIndex((Predicate<DSkinDynamicListBoxItem>)(m => m == this.ModelList.SelectedItem))), new AsyncCallback(this.CallbackReceive), (object)Ins.LOAD_MODEL_NAME);
+                    //new DelegateSendResult(UdpHelper.Instance.SendBroadcast).BeginInvoke(ProtocolWifi.ReadyLoadModel(this.ModelList.SelectedItem.Text, this.ModelList.Items.FindIndex((Predicate<DSkinDynamicListBoxItem>)(m => m == this.ModelList.SelectedItem))), new AsyncCallback(this.CallbackReceive), (object)Ins.LOAD_MODEL_NAME);
                     break;
                 case Ins.LOAD_MODEL_VALUE:
-                    new DelegateSendResult(UdpHelper.Instance.SendBroadcast).BeginInvoke(Protocol_Wifi.LoadModelValue(sender as byte[]), new AsyncCallback(this.CallbackReceive), (object)Ins.LOAD_MODEL_VALUE);
+                    new DelegateSendResult(UdpHelper.Instance.SendBroadcast).BeginInvoke(ProtocolWifi.LoadModelValue(sender as byte[]), new AsyncCallback(this.CallbackReceive), (object)Ins.LOAD_MODEL_VALUE);
                     break;
             }
         }
