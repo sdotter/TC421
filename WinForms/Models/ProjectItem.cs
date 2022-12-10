@@ -5,8 +5,6 @@
     using System.IO;
     using System.Text;
     using System.Collections.Generic;
-    using System.Runtime.Serialization.Formatters.Binary;
-    
 
     [Serializable]
     public class ProjectItem
@@ -35,7 +33,7 @@
             set => ProjectItem._Item = value;
         }
 
-        private string GetSettingsFilePath() => new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)).CreateSubdirectory("TC421").FullName + Path.DirectorySeparatorChar.ToString();
+        private string GetSettingsFilePath() => new DirectoryInfo(Environment.CurrentDirectory) + Path.DirectorySeparatorChar.ToString();
 
         public bool Save(string filename = "profile.json", bool IsCreat = false)
         {
@@ -51,22 +49,17 @@
             }
         }
 
-        public ProjectItem Clone()
-        {
-            BinaryFormatter binaryFormatter = new BinaryFormatter();
-            using (MemoryStream serializationStream = new MemoryStream())
-            {
-                binaryFormatter.Serialize((Stream)serializationStream, (ProjectItem)this);
-                serializationStream.Position = 0L;
-                return binaryFormatter.Deserialize((Stream)serializationStream) as ProjectItem;
-            }
-        }
-
         public ProjectItem Open(string filename = null)
         {
-            if (string.IsNullOrEmpty(filename)) filename = this.ProjectPath + "profile.json";
-            ProjectItem._Item = JsonConvert.DeserializeObject<ProjectItem>(Encoding.ASCII.GetString(File.ReadAllBytes(filename)));
-            return ProjectItem._Item;
+            try
+            {
+                if (string.IsNullOrEmpty(filename)) filename = this.ProjectPath + "profile.json";
+                ProjectItem._Item = JsonConvert.DeserializeObject<ProjectItem>(Encoding.ASCII.GetString(File.ReadAllBytes(filename)));
+                return ProjectItem._Item;
+            }
+            catch(Exception ex) { }
+
+            return null;
         }
     }
 }

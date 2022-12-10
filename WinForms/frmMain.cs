@@ -1,10 +1,11 @@
 ﻿namespace TC421
 {
     using System;
-    using System.Runtime.Remoting.Messaging;
     using System.Text;
     using System.Threading;
+    using System.Threading.Tasks;
     using System.Windows.Forms;
+    using System.Runtime.Remoting.Messaging;
 
     public partial class frmMain : Form
     {
@@ -57,21 +58,20 @@
                 {
                     ThisDeviceMac = macStr;
                     UdpHelper.Instance.DeviceMac = macStr;
-                    this.listBox1.Items.Add(string.Format("WIFIMAC-{0}", (object)macStr));
-                    this.SendWifi(Ins.TIME_SYNCHRONIZATION);
+                    this.listBox1.Items.Add(string.Format("MAC ADDRESS: {0}", (object)macStr));
                 }));
             }
         }
 
         private ProjectItem _ProjectItem;
-        public ProjectItem M_ProjectItem
+        public ProjectItem ProjectItem
         {
             get => this._ProjectItem ?? (this._ProjectItem = ProjectItem.Instance);
             set => this._ProjectItem = value;
         }
 
         private ModelItem _ModelItem;
-        public ModelItem M_ModelItem
+        public ModelItem ModelItem
         {
             set => this._ModelItem = value;
             get => this._ModelItem;
@@ -90,22 +90,30 @@
                 int dn1 = 6 * n + 1;
                 int index1 = 6 * (n + 1) + 1;
 
-                ChannelValue[0, 0] = ChannelValue[2, 0] = (int)this.M_ModelItem.ModelValues[dn1];
-                ChannelValue[0, 1] = ChannelValue[2, 1] = (int)this.M_ModelItem.ModelValues[dn1 + 1];
-                ChannelValue[0, 2] = ChannelValue[2, 2] = (int)this.M_ModelItem.ModelValues[dn1 + 2];
-                ChannelValue[0, 3] = ChannelValue[2, 3] = (int)this.M_ModelItem.ModelValues[dn1 + 3];
-                ChannelValue[0, 4] = ChannelValue[2, 4] = (int)this.M_ModelItem.ModelValues[dn1 + 4];
+                ChannelValue[0, 0] = ChannelValue[2, 0] = (int)this.ModelItem.ModelValues[dn1];
+                ChannelValue[0, 1] = ChannelValue[2, 1] = (int)this.ModelItem.ModelValues[dn1 + 1];
+                ChannelValue[0, 2] = ChannelValue[2, 2] = (int)this.ModelItem.ModelValues[dn1 + 2];
+                ChannelValue[0, 3] = ChannelValue[2, 3] = (int)this.ModelItem.ModelValues[dn1 + 3];
+                ChannelValue[0, 4] = ChannelValue[2, 4] = (int)this.ModelItem.ModelValues[dn1 + 4];
 
             }
-            
         }
         
         public frmMain()
         {
             InitializeComponent();
+        }
+
+        private void frmMain_Load(object sender, EventArgs e)
+        {
             this.SearchWifiDevice();
 
-            this.M_ProjectItem.Open();
+            Task.Run(() => {
+                Thread.Sleep(1000);
+                this.SendWifi(Ins.TIME_SYNCHRONIZATION);
+            });
+            
+            this.ProjectItem = this.ProjectItem.Open();
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -115,9 +123,9 @@
                 ModelItemName = "TestModelFilename.txt"
             };
 
-            this.M_ProjectItem.ModelSet.Add(modelItem1.ModelItemName, modelItem1);
-            this.M_ProjectItem.Save();
-            this.M_ModelItem = modelItem1;
+            this.ProjectItem.ModelSet.Add(modelItem1.ModelItemName, modelItem1);
+            this.ProjectItem.Save();
+            this.ModelItem = modelItem1;
         }
 
         private void CallbackReceive(IAsyncResult result)
@@ -194,11 +202,6 @@
                     new DelegateSendResult(UdpHelper.Instance.SendBroadcast).BeginInvoke(ProtocolWifi.LoadModelValue(sender as byte[]), new AsyncCallback(this.CallbackReceive), (object)Ins.LOAD_MODEL_VALUE);
                     break;
             }
-        }
-
-        private void frmMain_Load(object sender, EventArgs e)
-        {
-
         }
     }
 }
