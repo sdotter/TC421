@@ -1,18 +1,15 @@
 ﻿namespace TC421
 {
     using System;
+    using System.Runtime.CompilerServices;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
+    using System.Xml;
 
     internal class Main
     {
         private static string ThisDeviceMac = string.Empty;
-
-        private delegate byte[] DeleteSearch(byte[] data);
-        private delegate byte[] DelegateSendResult(byte[] data);
-        private delegate void DelegatePlay();
-        private delegate void DelegateLoadModel();
 
         public enum Ins
         {
@@ -38,23 +35,28 @@
         private RetureDataStaus PlayCurrentState = RetureDataStaus.RETURE_DATA_NONE;
         private RetureDataStaus LoadCurrentState = RetureDataStaus.RETURE_DATA_NONE;
 
-        private void SearchWifiDevice() => new DeleteSearch(UdpHelper.Instance.SendBroadcast).BeginInvoke(ProtocolWifi.SearchDevice(), new AsyncCallback(this.CallBackSearch), (object)null);
-
-        private void CallBackSearch(IAsyncResult result)
+        private async Task SearchWifiDevice()
         {
-            byte[] sourceArray = ((DeleteSearch)((AsyncResult)result).AsyncDelegate).EndInvoke(result);
-            if (sourceArray != null)
+            var searchDeviceTask = Task.Run(() => UdpHelper.Instance.SendBroadcast(ProtocolWifi.SearchDevice()));
+            var callbackTask = searchDeviceTask.ContinueWith(val =>
             {
-                if (sourceArray[0] != (byte)136 || sourceArray[2] != (byte)23)
-                    return;
+                byte[] sourceArray = val.Result as byte[];
+                if (sourceArray != null)
+                {
+                    if (sourceArray[0] != (byte)136 || sourceArray[2] != (byte)23)
+                        return;
 
-                byte[] numArray = new byte[12];
-                Array.Copy((Array)sourceArray, 4, (Array)numArray, 0, 12);
-                string macStr = Encoding.Default.GetString(numArray);
+                    byte[] numArray = new byte[12];
+                    Array.Copy((Array)sourceArray, 4, (Array)numArray, 0, 12);
+                    string macStr = Encoding.Default.GetString(numArray);
 
-                ThisDeviceMac = macStr;
-                UdpHelper.Instance.DeviceMac = macStr;
-            }
+                    ThisDeviceMac = macStr;
+                    UdpHelper.Instance.DeviceMac = macStr;
+                }
+            });
+
+            await searchDeviceTask;
+            await callbackTask;
         }
 
         private ProjectItem _ProjectItem;
@@ -112,15 +114,8 @@
             this.ModelItem = modelItem1;
         }
 
-        private void CallbackReceive(IAsyncResult result)
+        private async Task CallbackReceive(byte[] numArray, object obj)
         {
-            byte[] numArray = ((DelegateSendResult)((AsyncResult)result).AsyncDelegate).EndInvoke(result);
-            object asyncState = result.AsyncState;
-
-            if (asyncState == null)
-                return;
-
-            object obj = asyncState;
             int num = obj is Ins ? 1 : 0;
             Ins ins = num != 0 ? (Ins)obj : Ins.SEARCH_DEVICE;
 
@@ -160,42 +155,41 @@
             }
         }
 
-        public void SendWifi(Ins ins, object sender = null)
+
+        public async Task SendWifi(Ins ins, object sender = null)
         {
             switch (ins)
             {
                 case Ins.TIME_SYNCHRONIZATION:
-                    new DelegateSendResult(UdpHelper.Instance.SendBroadcast).BeginInvoke(ProtocolWifi.TimeSynchronization(), new AsyncCallback(this.CallbackReceive), (object)Ins.TIME_SYNCHRONIZATION);
+                    await Task.Run(() => UdpHelper.Instance.SendBroadcast(ProtocolWifi.TimeSynchronization())).ContinueWith(val => this.CallbackReceive(val.Result as byte[], (object)Ins.TIME_SYNCHRONIZATION));
                     break;
                 case Ins.CLEAR_DEVICE_MODEL:
-                    new DelegateSendResult(UdpHelper.Instance.SendBroadcast).BeginInvoke(ProtocolWifi.ClearAllModel(), new AsyncCallback(this.CallbackReceive), (object)Ins.CLEAR_DEVICE_MODEL);
+                    await Task.Run(() => UdpHelper.Instance.SendBroadcast(ProtocolWifi.ClearAllModel())).ContinueWith(val => this.CallbackReceive(val.Result as byte[], (object)Ins.CLEAR_DEVICE_MODEL));
                     break;
                 case Ins.PLAY_MODEL_NAME:
-                    //UdpHelper.Instance.SendBroadcastNone(ProtocolWifi.ReadyPlayModel(this.ModelList.SelectedItem.Text));
+                    await Task.Run(() => UdpHelper.Instance.SendBroadcastNone(ProtocolWifi.ReadyPlayModel("TODO: FIX" /*this.ModelList.SelectedItem.Text*/)));
                     break;
                 case Ins.PLAY_MODEL_VALUE:
-                    UdpHelper.Instance.SendBroadcastNone(ProtocolWifi.PlayModelValues(sender as byte[]));
+                    await Task.Run(() => UdpHelper.Instance.SendBroadcastNone(ProtocolWifi.PlayModelValues(sender as byte[])));
                     break;
                 case Ins.END_TRANSMISSION:
-                    new DelegateSendResult(UdpHelper.Instance.SendBroadcast).BeginInvoke(ProtocolWifi.EndTransmission(), new AsyncCallback(this.CallbackReceive), (object)Ins.END_TRANSMISSION);
+                    await Task.Run(() => UdpHelper.Instance.SendBroadcast(ProtocolWifi.EndTransmission())).ContinueWith(val => this.CallbackReceive(val.Result as byte[], (object)Ins.END_TRANSMISSION));
                     break;
                 case Ins.LOAD_MODEL_NAME:
                     //new DelegateSendResult(UdpHelper.Instance.SendBroadcast).BeginInvoke(ProtocolWifi.ReadyLoadModel(this.ModelList.SelectedItem.Text, this.ModelList.Items.FindIndex((Predicate<DSkinDynamicListBoxItem>)(m => m == this.ModelList.SelectedItem))), new AsyncCallback(this.CallbackReceive), (object)Ins.LOAD_MODEL_NAME);
                     break;
                 case Ins.LOAD_MODEL_VALUE:
-                    new DelegateSendResult(UdpHelper.Instance.SendBroadcast).BeginInvoke(ProtocolWifi.LoadModelValue(sender as byte[]), new AsyncCallback(this.CallbackReceive), (object)Ins.LOAD_MODEL_VALUE);
+                    await Task.Run(() => UdpHelper.Instance.SendBroadcast(ProtocolWifi.LoadModelValue(sender as byte[]))).ContinueWith(val => this.CallbackReceive(val.Result as byte[], (object)Ins.LOAD_MODEL_VALUE));
                     break;
             }
         }
 
-        public void DoWork()
+        public async void DoWork()
         {
-            this.SearchWifiDevice();
+            await this.SearchWifiDevice();
+            await this.SendWifi(Ins.TIME_SYNCHRONIZATION);
 
-            Task.Run(() => {
-                Thread.Sleep(1000);
-                this.SendWifi(Ins.TIME_SYNCHRONIZATION);
-            });
+            Console.WriteLine(ThisDeviceMac);
 
             this.ProjectItem = this.ProjectItem.Open();
 
