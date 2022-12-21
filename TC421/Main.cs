@@ -208,7 +208,7 @@
             {
                 Console.Write("Get MAC from device: ");
                 await this.SearchWifiDevice();
-                Console.Write(ThisDeviceMac);
+                Console.Write($"{ThisDeviceMac}\n");
                 KeepGoing = false;
             });
 
@@ -216,7 +216,7 @@
                 if (generateOptionValue != null)
                 {
                     if (CreateEmptyModel(generateOptionValue.FullName))
-                        Console.Write($"Created empty model: {generateOptionValue.FullName}");
+                        Console.Write($"Created empty model: {generateOptionValue.FullName}\n");
 
                     KeepGoing = false;
                 }
