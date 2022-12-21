@@ -37,11 +37,10 @@
 
         public bool Save(string filename = "profile.json", bool IsCreat = false)
         {
-            string path = string.Format("{0}", (object)this.ProjectPath);
-            Directory.CreateDirectory(path);
-            if (IsCreat && File.Exists(path + string.Format("\\{0}", (object)filename)))
+            if (IsCreat && File.Exists(filename))
                 return false;
-            using (FileStream serializationStream = new FileStream(path + string.Format("\\{0}", (object)filename), FileMode.Create))
+
+            using (FileStream serializationStream = new FileStream(filename, FileMode.Create))
             {
                 byte[] bytesA = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject((ProjectItem)this));
                 serializationStream.Write(bytesA, 0, bytesA.Length);

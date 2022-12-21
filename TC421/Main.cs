@@ -1,11 +1,10 @@
 ﻿namespace TC421
 {
     using System;
-    using System.Runtime.CompilerServices;
+    using System.CommandLine;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
-    using System.Xml;
 
     internal class Main
     {
@@ -95,23 +94,21 @@
             }
         }
 
-        public bool KeepGoing { get; set; }
+        public Main() { }
 
-        public Main()
-        {
-            KeepGoing = true;
-        }
+        public static bool KeepGoing = true;
 
-        public void temp()
+        public bool CreateEmptyModel(string? filename = null)
         {
-            ModelItem modelItem1 = new ModelItem()
+            ModelItem modelItem = new ModelItem()
             {
-                ModelItemName = "TestModelFilename.txt"
+                ModelItemName = "ModelName"
             };
 
-            this.ProjectItem.ModelSet.Add(modelItem1.ModelItemName, modelItem1);
-            this.ProjectItem.Save();
-            this.ModelItem = modelItem1;
+            this.ProjectItem.ModelSet.Add(modelItem.ModelItemName, modelItem);
+            this.ModelItem = modelItem;
+
+            return this.ProjectItem.Save(filename);
         }
 
         private async Task CallbackReceive(byte[] numArray, object obj)
@@ -155,7 +152,6 @@
             }
         }
 
-
         public async Task SendWifi(Ins ins, object sender = null)
         {
             switch (ins)
@@ -184,19 +180,50 @@
             }
         }
 
-        public async void DoWork()
+        public async Task<int> DoWork(string[] args)
         {
-            await this.SearchWifiDevice();
-            await this.SendWifi(Ins.TIME_SYNCHRONIZATION);
+            KeepGoing = !args.Contains("--help");
 
-            Console.WriteLine(ThisDeviceMac);
+            var rootCommand = new RootCommand("Reverse engineering for TC421 (TimeControl) for controlling your TC421 led controller remotely");
+            var generateOption = new Option<FileInfo?>("--generate", description: "Generate empty model file (as template).", getDefaultValue: () => null);
+            var uploadOption = new Option<string>("--upload", description: "Upload model to TC421 controller.");
+            var sync = new Command("sync", description: "Synchronize time.");
+            var macAddr = new Command("mac", description: "Get MAC from device.");
 
-            this.ProjectItem = this.ProjectItem.Open();
+            rootCommand.AddOption(generateOption);
+            rootCommand.Add(sync);
+            rootCommand.Add(macAddr);
+            rootCommand.AddOption(uploadOption);
 
-            while (KeepGoing)
-            {  
-                Thread.Sleep(100);
-            }
+            sync.SetHandler(async () =>
+            {
+                await this.SearchWifiDevice();
+                await this.SendWifi(Ins.TIME_SYNCHRONIZATION).ContinueWith(val => {
+                    Console.WriteLine("Synchronizing time finished!");
+                });
+                KeepGoing = false;
+            });
+
+            macAddr.SetHandler(async () =>
+            {
+                Console.Write("Get MAC from device: ");
+                await this.SearchWifiDevice();
+                Console.Write(ThisDeviceMac);
+                KeepGoing = false;
+            });
+
+            rootCommand.SetHandler((uploadOptionValue, generateOptionValue) => {
+                if (generateOptionValue != null)
+                {
+                    if (CreateEmptyModel(generateOptionValue.FullName))
+                        Console.Write($"Created empty model: {generateOptionValue.FullName}");
+
+                    KeepGoing = false;
+                }
+                else if (uploadOptionValue != string.Empty) this.ProjectItem = this.ProjectItem.Open(args[2]);
+            }, uploadOption, generateOption);
+
+            return await rootCommand.InvokeAsync(args);
         }
     }
 }
