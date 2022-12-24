@@ -2,6 +2,7 @@
 {
     using System;
     using System.CommandLine;
+    using System.Reflection;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
@@ -152,6 +153,17 @@
             }
         }
 
+        private bool IsStopLoad;
+        private async Task CallLoadModel(object obj)
+        {
+            //((FrmMain.DelegateLoadModel)((AsyncResult)result).AsyncDelegate).EndInvoke(result);
+            this.LoadCurrentState = RetureDataStaus.RETURE_DATA_NONE;
+            //this.Invoke(new System.Threading.ThreadStart(() => this.M_FrmLoading.Close()));
+            this.IsStopLoad = false;
+            Thread.Sleep(1000);
+            //this.SetToolTip(I18N._("就绪"));
+        }
+
         public async Task SendWifi(Ins ins, object sender = null)
         {
             switch (ins)
@@ -173,11 +185,155 @@
                     break;
                 case Ins.LOAD_MODEL_NAME:
                     //new DelegateSendResult(UdpHelper.Instance.SendBroadcast).BeginInvoke(ProtocolWifi.ReadyLoadModel(this.ModelList.SelectedItem.Text, this.ModelList.Items.FindIndex((Predicate<DSkinDynamicListBoxItem>)(m => m == this.ModelList.SelectedItem))), new AsyncCallback(this.CallbackReceive), (object)Ins.LOAD_MODEL_NAME);
+                    await Task.Run(() => UdpHelper.Instance.SendBroadcast(ProtocolWifi.ReadyLoadModel(this.ProjectItem.ProjectName, 0))).ContinueWith(val => this.CallbackReceive(val.Result as byte[], (object)Ins.LOAD_MODEL_NAME));
                     break;
                 case Ins.LOAD_MODEL_VALUE:
                     await Task.Run(() => UdpHelper.Instance.SendBroadcast(ProtocolWifi.LoadModelValue(sender as byte[]))).ContinueWith(val => this.CallbackReceive(val.Result as byte[], (object)Ins.LOAD_MODEL_VALUE));
                     break;
             }
+        }
+
+        private void SendUsbData(Ins ins, byte[] value = null)
+        {
+            int num;
+            Task.Run(() => num = 6).Start();
+        }
+
+        public async Task WifiLoadModel()
+        {
+            this.SendWifi(Ins.LOAD_MODEL_NAME);
+            this.LoadCurrentState = RetureDataStaus.RETURE_DATA_START;
+            bool flag1 = false;
+            int num1 = 0;
+            byte[] sender = new byte[8];
+            while (!flag1)
+            {
+                if (this.LoadCurrentState == RetureDataStaus.RETURE_DATA_START)
+                {
+                    //this.SetToolTip(I18N._("正在下载模式到设备..."), 120000);
+                    this.LoadCurrentState = RetureDataStaus.RETURE_DATA_SUCCESS;
+                    for (int index1 = 0; index1 < 48; ++index1)
+                    {
+                        if (this.IsStopLoad)
+                            return;
+                        bool flag2 = false;
+                        bool flag3 = true;
+                        int num2 = 0;
+                        while (!flag2)
+                        {
+                            if (this.LoadCurrentState == RetureDataStaus.RETURE_DATA_SUCCESS || this.LoadCurrentState == RetureDataStaus.RETURE_DATA_FAIL)
+                            {
+                                if (this.LoadCurrentState == RetureDataStaus.RETURE_DATA_FAIL)
+                                {
+                                    if (num2++ > 20)
+                                    {
+                                        this.SendWifi(Ins.END_TRANSMISSION);
+                                        //this.ThreadFrmMessage(I18N._("等待设备响应数据超时"), I18N._("失败提示"));
+                                        this.IsStopLoad = true;
+                                        return;
+                                    }
+                                    if (flag3)
+                                    {
+                                        int num3;
+                                        if (index1 <= 0)
+                                        {
+                                            num3 = index1;
+                                        }
+                                        else
+                                        {
+                                            int num4 = num3 = index1 - 1;
+                                        }
+                                        index1 = num3;
+                                    }
+                                    flag3 = false;
+                                }
+                                int num5 = 6 * index1 + 1;
+                                int num6 = 0;
+                                byte[] numArray1 = sender;
+                                int index2 = num6;
+                                int num7 = index2 + 1;
+                                int num8 = (int)Convert.ToByte(index1);
+                                numArray1[index2] = (byte)num8;
+                                byte[] numArray2 = sender;
+                                int index3 = num7;
+                                int num9 = index3 + 1;
+                                int num10 = (int)Convert.ToByte(index1 / 2);
+                                numArray2[index3] = (byte)num10;
+                                byte[] numArray3 = sender;
+                                int index4 = num9;
+                                int num11 = index4 + 1;
+                                int num12 = (int)Convert.ToByte(index1 % 2 == 0 ? 0 : 30);
+                                numArray3[index4] = (byte)num12;
+                                byte[] numArray4 = sender;
+                                int index5 = num11;
+                                int num13 = index5 + 1;
+                                List<object> modelValues1 = this.ModelItem.ModelValues;
+                                int index6 = num5;
+                                int num14 = index6 + 1;
+                                int num15 = (int)Convert.ToByte(modelValues1[index6]);
+                                numArray4[index5] = (byte)num15;
+                                byte[] numArray5 = sender;
+                                int index7 = num13;
+                                int num16 = index7 + 1;
+                                List<object> modelValues2 = this.ModelItem.ModelValues;
+                                int index8 = num14;
+                                int num17 = index8 + 1;
+                                int num18 = (int)Convert.ToByte(modelValues2[index8]);
+                                numArray5[index7] = (byte)num18;
+                                byte[] numArray6 = sender;
+                                int index9 = num16;
+                                int num19 = index9 + 1;
+                                List<object> modelValues3 = this.ModelItem.ModelValues;
+                                int index10 = num17;
+                                int num20 = index10 + 1;
+                                int num21 = (int)Convert.ToByte(modelValues3[index10]);
+                                numArray6[index9] = (byte)num21;
+                                byte[] numArray7 = sender;
+                                int index11 = num19;
+                                int num22 = index11 + 1;
+                                List<object> modelValues4 = this.ModelItem.ModelValues;
+                                int index12 = num20;
+                                int index13 = index12 + 1;
+                                int num23 = (int)Convert.ToByte(modelValues4[index12]);
+                                numArray7[index11] = (byte)num23;
+                                byte[] numArray8 = sender;
+                                int index14 = num22;
+                                int num24 = index14 + 1;
+                                int num25 = (int)Convert.ToByte(this.ModelItem.ModelValues[index13]);
+                                numArray8[index14] = (byte)num25;
+
+                                Console.WriteLine($"Uploading: {(100 / 48) * (index1 + 1)}% complete...");
+                                this.SendWifi(Ins.LOAD_MODEL_VALUE, (object)sender);
+                                if (this.LoadCurrentState == RetureDataStaus.RETURE_DATA_SUCCESS)
+                                {
+                                    flag2 = true;
+                                    flag3 = true;
+                                }
+                                this.LoadCurrentState = RetureDataStaus.RETURE_DATA_WAIT;
+                            }
+                            if (num2++ > 20)
+                            {
+                                this.SendWifi(Ins.END_TRANSMISSION);
+                                //this.ThreadFrmMessage(I18N._("等待设备响应数据超时"), I18N._("失败提示"));
+                                this.IsStopLoad = true;
+                                return;
+                            }
+                            Thread.Sleep(100);
+                        }
+                    }
+                    this.SendWifi(Ins.END_TRANSMISSION);
+                    flag1 = true;
+                }
+                if (num1++ > 10)
+                {
+                    flag1 = true;
+                    this.SendUsbData(Ins.END_TRANSMISSION);
+                    //this.ThreadFrmMessage(I18N._("等待设备响应下载模式超时"), I18N._("失败提示"));
+                }
+                Thread.Sleep(500);
+            }
+
+            Console.WriteLine($"Uploading: Complete!");
         }
 
         public async Task<int> DoWork(string[] args)
@@ -212,7 +368,7 @@
                 KeepGoing = false;
             });
 
-            rootCommand.SetHandler((uploadOptionValue, generateOptionValue) => {
+            rootCommand.SetHandler(async (uploadOptionValue, generateOptionValue) => {
                 if (generateOptionValue != null)
                 {
                     if (CreateEmptyModel(generateOptionValue.FullName))
@@ -220,7 +376,16 @@
 
                     KeepGoing = false;
                 }
-                else if (uploadOptionValue != string.Empty) this.ProjectItem = this.ProjectItem.Open(args[2]);
+                else if (uploadOptionValue != string.Empty)
+                {
+                    this.ProjectItem = this.ProjectItem.Open(args[1]);
+                    this.ModelItem = this.ProjectItem.ModelSet.ToList()[0].Value;
+                    await this.SearchWifiDevice();
+                    await this.WifiLoadModel().ContinueWith(async val => {
+                        await this.CallLoadModel(val);
+                        KeepGoing = false;
+                    });
+                }
             }, uploadOption, generateOption);
 
             return await rootCommand.InvokeAsync(args);

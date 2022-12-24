@@ -53,7 +53,10 @@
             try
             {
                 if (string.IsNullOrEmpty(filename)) filename = this.ProjectPath + "profile.json";
-                ProjectItem._Item = JsonConvert.DeserializeObject<ProjectItem>(Encoding.ASCII.GetString(File.ReadAllBytes(filename)));
+                ProjectItem._Item = JsonConvert.DeserializeObject<ProjectItem>(Encoding.UTF8.GetString(File.ReadAllBytes(filename)), new JsonSerializerSettings
+                {
+                    ObjectCreationHandling = ObjectCreationHandling.Replace
+                });
                 return ProjectItem._Item;
             }
             catch(Exception ex) { }
