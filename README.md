@@ -22,9 +22,9 @@ Reverse engineering for TC421 (TimeControl) for controlling your TC421 led contr
 
 ## How to run on Windows / Linux / Raspberry Pi:
 ### Windows:
-`TC421.exe upload profile.json`
+`TC421.exe --upload profile.json`
 ### Linux:
-`dotnet TC421.dll upload profile.json`
+`dotnet TC421.dll --upload profile.json`
 
 ## How to install dotnet on Linux / Raspberry Pi
 	curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --channel STS
