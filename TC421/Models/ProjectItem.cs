@@ -42,7 +42,7 @@
 
             using (FileStream serializationStream = new FileStream(filename, FileMode.Create))
             {
-                byte[] bytesA = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject((ProjectItem)this));
+                byte[] bytesA = Encoding.ASCII.GetBytes(JsonConvert.SerializeObject((ProjectItem)this, Formatting.Indented));
                 serializationStream.Write(bytesA, 0, bytesA.Length);
                 return true;
             }
