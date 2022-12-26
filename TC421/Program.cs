@@ -7,7 +7,7 @@
         static void Main(string[] args)
         {
             Main main = new Main();
-            Thread t = new Thread(() => main.DoWork(args.Length > 0 ? args : new string[] { "--upload", "profile-normal.json" }));
+            Thread t = new Thread(() => main.DoWork(args.Length > 0 ? args : new string[] { "" }));
 
             t.IsBackground = true;
             t.Start();
