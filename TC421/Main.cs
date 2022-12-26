@@ -336,7 +336,7 @@
 
         public async Task<int> DoWork(string[] args)
         {
-            KeepGoing = !args.Contains("--help");
+            KeepGoing = !args.Contains("--help") && !args.Contains("-h") && !args.Contains("-?");
 
             var rootCommand = new RootCommand("Reverse engineering for TC421 (TimeControl) for controlling your TC421 led controller remotely");
             var generateOption = new Option<FileInfo?>("--generate", description: "Generate empty model file (as template).", getDefaultValue: () => null);
